@@ -1,0 +1,9 @@
+# IDE
+/.idea/shelf/
+/.idea/workspace.xml
+/workspace.xml
+
+# Build / relatórios
+target/
+allure-results/
+allure-report/
