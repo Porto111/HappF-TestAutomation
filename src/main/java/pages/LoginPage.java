@@ -25,11 +25,9 @@ public class LoginPage extends BasePage {
     private final By campoSenha = AppiumBy.androidUIAutomator(
             "new UiSelector().className(\"android.widget.EditText\").instance(1)");
     private final By btnEntrar = AppiumBy.accessibilityId("Entrar");
-    private final By btnNaoTemCadastro = By.xpath(
-            "//android.widget.Button[@content-desc=\"Não tem cadastro? Cadastrar\"]");
-    private final By esqueceuSenhaLink = By.xpath(
-            "//*[contains(@content-desc,'Esqueceu a senha') or contains(@content-desc,'Esqueci a senha')]");
-
+    private final By btnNaoTemCadastro = AppiumBy.accessibilityId("Não tem cadastro? Cadastrar");
+    private final By esqueceuSenhaLink = AppiumBy.accessibilityId("Esqueci a senha");
+    private final By btnCadastrar = AppiumBy.accessibilityId("Quero me cadastrar");
     // ==================== ACTIONS ====================
 
     public void preencherEmail(String email) {
@@ -106,7 +104,7 @@ public class LoginPage extends BasePage {
 
     /** Tela de login visível (checagem curta: não trava quando o usuário já está logado). */
     public boolean estaVisivel() {
-        return isVisible(btnEntrar, 5) && isVisible(campoEmail, 5);
+        return  isVisible(btnEntrar) && isVisible(campoEmail);
     }
 
     public boolean telaDeLoginEstaApresentada(long segundos) {
