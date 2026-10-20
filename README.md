@@ -10,7 +10,7 @@ O escopo atual cobre **cadastro, autenticação e consulta de produtos** na pers
 
 A feature de cadastro cria um e-mail aleatório no domínio de teste configurado e um número de telemóvel com formato brasileiro. A conta é criada no backend ao executar o cenário positivo; por isso, este cenário está marcado `@staging @mutates-data` e deve ser executado apenas contra uma instalação de teste ligada a um backend de staging.
 
-A **compra com o utilizador recém-criado continua por implementar e por executar**. O material fornecido não permite saber como a aplicação apresenta o catálogo do lado do comprador, detalhe do produto, carrinho, morada, método de pagamento ou confirmação da encomenda. Consultar a secção [O que falta para automatizar a compra](#o-que-falta-para-automatizar-a-compra).
+A **compra com o utilizador recém-criado continua por implementar e por executar**.
 
 ## Estrutura
 
