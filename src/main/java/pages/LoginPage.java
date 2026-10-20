@@ -27,7 +27,7 @@ public class LoginPage extends BasePage {
     private final By btnEntrar = AppiumBy.accessibilityId("Entrar");
     private final By btnNaoTemCadastro = AppiumBy.accessibilityId("Não tem cadastro? Cadastrar");
     private final By esqueceuSenhaLink = AppiumBy.accessibilityId("Esqueci a senha");
-    private final By btnCadastrar = AppiumBy.accessibilityId("Quero me cadastrar");
+    //private final By btnCadastrar = AppiumBy.accessibilityId("Quero me cadastrar");
     // ==================== ACTIONS ====================
 
     public void preencherEmail(String email) {
