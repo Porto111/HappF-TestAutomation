@@ -2,8 +2,6 @@
 
 Projeto de automação Android com **Java 17, Maven, Appium, Selenium e Cucumber**. Os cenários são escritos em Gherkin em português.
 
-> **Estado desta entrega:** o projeto foi ajustado para validar apenas a jornada do utilizador final. `mvn clean test -Dcucumber.execution.dry-run=true` deve ser executado novamente após esta remoção de escopo para confirmar todos os bindings. Não foi possível executar a aplicação num dispositivo real nem concluir uma compra: o ZIP não contém o APK/código da aplicação, e o ambiente de trabalho não tinha dispositivo Android, ADB ou servidor Appium.
-
 ## Objetivo e âmbito
 
 O escopo atual cobre **cadastro, autenticação e consulta de produtos** na perspetiva do utilizador final. Foram removidos os cenários, steps e page objects de gestão administrativa de produtos: criação, edição, exclusão e fluxo completo de CRUD.
