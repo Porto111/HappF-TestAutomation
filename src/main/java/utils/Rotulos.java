@@ -2,33 +2,41 @@ package utils;
 
 import org.openqa.selenium.By;
 
-/** Builders de XPath para o Flutter, que expõe rótulos em content-desc (e às vezes em text). */
+/** Builders XPath para elementos Flutter expostos por content-desc/text. */
 public final class Rotulos {
+    private Rotulos() {}
 
-    private Rotulos() {
-    }
-
-    /** Qualquer elemento cujo content-desc/text CONTENHA um dos rótulos. */
     public static By contem(String... rotulos) {
-        StringBuilder sb = new StringBuilder("//*[");
+        StringBuilder xpath = new StringBuilder("//*[" );
         for (int i = 0; i < rotulos.length; i++) {
-            if (i > 0) {
-                sb.append(" or ");
-            }
-            sb.append("contains(@content-desc,'").append(rotulos[i]).append("')")
-              .append(" or contains(@text,'").append(rotulos[i]).append("')");
+            if (i > 0) xpath.append(" or ");
+            String literal = xpathLiteral(rotulos[i]);
+            xpath.append("contains(@content-desc,").append(literal).append(")")
+                    .append(" or contains(@text,").append(literal).append(")");
         }
-        return By.xpath(sb.append("]").toString());
+        return By.xpath(xpath.append("]").toString());
     }
 
-    /** Elemento cujo content-desc COMEÇA com o rótulo (evita textos longos que só o citam). */
     public static By comecaCom(String rotulo) {
-        return By.xpath("//*[starts-with(@content-desc,'" + rotulo + "') or starts-with(@text,'" + rotulo + "')]");
+        String literal = xpathLiteral(rotulo);
+        return By.xpath("//*[starts-with(@content-desc," + literal + ") or starts-with(@text," + literal + ")]");
     }
 
-    /** Aba da barra de navegação inferior (Flutter anexa "Tab n of m" ao rótulo). */
     public static By aba(String rotulo) {
-        return By.xpath("//*[(contains(@content-desc,'" + rotulo + "') and contains(@content-desc,'Tab'))"
-                + " or @content-desc='" + rotulo + "']");
+        String literal = xpathLiteral(rotulo);
+        return By.xpath("//*[(contains(@content-desc," + literal + ") and contains(@content-desc,'Tab'))"
+                + " or @content-desc=" + literal + "]");
+    }
+
+    public static String xpathLiteral(String value) {
+        if (!value.contains("'")) return "'" + value + "'";
+        if (!value.contains("\"")) return "\"" + value + "\"";
+        String[] parts = value.split("'", -1);
+        StringBuilder result = new StringBuilder("concat(");
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) result.append(", \"'\", ");
+            result.append("'").append(parts[i]).append("'");
+        }
+        return result.append(")").toString();
     }
 }

@@ -6,6 +6,9 @@ import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Tela de login do Happ Fé (Flutter: rótulos expostos em content-desc).
  * Textos confirmados no binário do app v2.0.0: "Faça seu login para acessar", "Entrar",
@@ -19,6 +22,8 @@ public class LoginPage extends BasePage {
 
     // ==================== LOCATORS ====================
 
+    By toast = By.className("android.widget.Toast");
+
     private final By tituloLogin = AppiumBy.androidUIAutomator(
             "new UiSelector().descriptionContains(\"Faça seu login para acessar\")");
     private final By campoEmail = AppiumBy.androidUIAutomator(
@@ -29,6 +34,7 @@ public class LoginPage extends BasePage {
     private final By btnNaoTemCadastro = AppiumBy.accessibilityId("Não tem cadastro? Cadastrar");
     private final By esqueceuSenhaLink = AppiumBy.accessibilityId("Esqueci a senha");
     private final By loadingSpinner = By.id(TestConfig.APP_PACKAGE + ":id/loading_spinner");
+    private final By errorMessage = By.id(TestConfig.APP_PACKAGE + ":id/error_text");
 
     // ==================== ACTIONS ====================
 
@@ -84,24 +90,60 @@ public class LoginPage extends BasePage {
 
     /** Login bem-sucedido = botão "Entrar" desapareceu. */
     public boolean loginBemSucedido() {
-        return wait.waitForInvisible(btnEntrar, TestConfig.DEFAULT_TIMEOUT);
+        return driver.findElements(btnEntrar).stream().noneMatch(WebElement::isDisplayed);
     }
 
     public boolean permaneceNaTelaDeLogin() {
         return isVisible(btnEntrar, TestConfig.SHORT_TIMEOUT);
     }
 
-    /** Mensagem (content-desc ou text) contendo o trecho, aguardando alguns segundos. */
-    public boolean existeMensagem(String trecho) {
-        long limite = System.currentTimeMillis() + 5_000;
-        while (System.currentTimeMillis() < limite) {
-            if (existeMensagemAgora(trecho)) {
-                return true;
+    public String obterMensagemErro() {
+        List<WebElement> messages = driver.findElements(errorMessage);
+        for (WebElement message : messages) {
+            String text = textoDoElemento(message);
+            if (!text.isBlank()) {
+                return text;
             }
-            pause(500);
         }
-        return false;
+
+        List<String> candidates = new ArrayList<>();
+        candidates.addAll(textosVisiveis(By.className("android.widget.Toast")));
+        candidates.addAll(textosVisiveis(By.className("android.widget.TextView")));
+        candidates.addAll(textosVisiveis(AppiumBy.androidUIAutomator(
+                "new UiSelector().descriptionContains(\"erro\")")));
+        return candidates.stream()
+                .filter(text -> !text.isBlank())
+                .filter(this::pareceMensagemDeErro)
+                .findFirst()
+                .orElse("");
     }
+
+    private boolean pareceMensagemDeErro(String texto) {
+        String normalizado = texto.toLowerCase();
+        return normalizado.contains("erro")
+                || normalizado.contains("inválid")
+                || normalizado.contains("invalid")
+                || normalizado.contains("credencial")
+                || normalizado.contains("obrigat")
+                || normalizado.contains("preench");
+    }
+
+    private List<String> textosVisiveis(By locator) {
+        return driver.findElements(locator).stream()
+                .filter(WebElement::isDisplayed)
+                .map(this::textoDoElemento)
+                .filter(text -> !text.isBlank())
+                .toList();
+    }
+
+    private String textoDoElemento(WebElement element) {
+        String text = element.getText();
+        if (text == null || text.isBlank()) {
+            text = element.getAttribute("text");
+        }
+        return text == null ? "" : text.trim();
+    }
+
 
     private boolean existeMensagemAgora(String trecho) {
         String t = trecho.replace("\"", "\\\"");
@@ -112,7 +154,9 @@ public class LoginPage extends BasePage {
     }
 
     /** Tela de login visível (checagem curta: não trava quando o usuário já está logado). */
+
     public boolean estaVisivel() {
+
         return  isVisible(btnEntrar) && isVisible(campoEmail);
     }
 

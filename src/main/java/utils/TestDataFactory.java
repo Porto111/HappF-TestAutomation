@@ -1,6 +1,7 @@
 package utils;
 
 import config.TestConfig;
+import java.util.UUID;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -11,10 +12,15 @@ public final class TestDataFactory {
     }
 
     public static Usuario novoUsuario() {
-        long agora = System.currentTimeMillis();
-        String email = "qa.happfe." + agora + "@email.com";
-        // Celular BR com 11 dígitos: DDD 11 + 9 + 8 dígitos
-        String celular = "119" + String.format("%08d", ThreadLocalRandom.current().nextInt(100_000_000));
-        return new Usuario("QA Teste " + agora % 100000, email, celular, TestConfig.NEW_USER_PASSWORD);
+        String id = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        String email = "qa.happfe." + id + "@" + TestConfig.TEST_EMAIL_DOMAIN;
+        String celular = TestConfig.TEST_USER_PHONE.isBlank() ? gerarTelefone(id) : TestConfig.TEST_USER_PHONE;
+        return new Usuario("QA Teste " + id.substring(0, 8), email, celular, TestConfig.NEW_USER_PASSWORD);
+    }
+
+    private static String gerarTelefone(String id) {
+        String digits = id.replaceAll("\\D", "");
+        String suffix = (digits + "00000000").substring(0, 8);
+        return "119" + suffix;
     }
 }

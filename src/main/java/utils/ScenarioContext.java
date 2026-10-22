@@ -8,6 +8,7 @@ public final class ScenarioContext {
 
     private static final ThreadLocal<Usuario> USUARIO = new ThreadLocal<>();
     private static final ThreadLocal<String> PRODUTO = new ThreadLocal<>();
+    private static final ThreadLocal<String> PEDIDO = new ThreadLocal<>();
 
     private ScenarioContext() {
     }
@@ -32,8 +33,13 @@ public final class ScenarioContext {
         return PRODUTO.get();
     }
 
+    public static void setPedido(String pedido) { PEDIDO.set(pedido); }
+
+    public static String getPedido() { return PEDIDO.get(); }
+
     public static void reset() {
         USUARIO.remove();
         PRODUTO.remove();
+        PEDIDO.remove();
     }
 }

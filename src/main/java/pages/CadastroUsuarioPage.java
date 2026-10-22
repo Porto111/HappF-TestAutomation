@@ -1,245 +1,287 @@
 package pages;
 
+import config.TestConfig;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import utils.Usuario;
 
-import java.util.List;
+/**
+ * Page Object do fluxo de cadastro de novo usuário (tela de login -> tela de cadastro).
+ *
+ * Os textos do app são expostos via content-desc (e não via text), por isso as buscas
+ * por mensagem consideram os dois atributos.
+ */
+public class CadastroUsuarioPage extends BasePage {
 
-/** Page Object do fluxo de cadastro de utilizador. */
-public class CadastroUsuarioPage extends LoginPage {
-    private final By btnConcluirCadastro = AppiumBy.accessibilityId("Quero me cadastrar");
-    private final By telaCadastro = By.xpath(
-            "//android.view.View[@content-desc=\"Faça seu cadastro para acessar\"]");
-    private final By telaInicial = By.xpath(
-            "//android.widget.ImageView[contains(@content-desc, 'Faça seu login para acessar')]");
+    // ==================== LOCATORS ====================
+
+    private final By tituloLogin = descricaoContem("Faça seu login para acessar");
+    private final By tituloCadastro = descricaoContem("Faça seu cadastro para acessar");
+
+    private final By campoNome = campoTexto(0);
+    private final By campoEmail = campoTexto(1);
+    private final By campoCelular = campoTexto(2);
+    private final By campoSenha = campoTexto(3);
+    private final By campoConfirmarSenha = campoTexto(4);
+
+    private final By btnNaoTemCadastro = AppiumBy.accessibilityId("Não tem cadastro? Cadastrar");    private final By btnJaTenhoCadastro = By.xpath("//android.widget.Button[@content-desc=\"Já tenho cadastro. Fazer login\"]");
+    private final By btnQueroMeCadastrar = By.xpath("//android.widget.Button[@content-desc=\"Quero me cadastrar\"]");
+
+    // "Li e concordo com Termos e Politicas" (texto confirmado no app). Checkbox nativo do Flutter.
+    private final By checkboxTermos = By.xpath(
+            "//android.widget.CheckBox[contains(@content-desc,'concordo') or contains(@content-desc,'Termos')]");
+    private final By qualquerCheckbox = By.xpath("//android.widget.CheckBox");
+
+    /** Resultado do envio do formulário de cadastro. */
+    public enum ResultadoCadastro { SUCESSO, ERRO_VALIDACAO, EXIGE_CODIGO_SMS, TIMEOUT }
 
     public CadastroUsuarioPage(AppiumDriver driver) {
         super(driver);
     }
 
+    // ==================== NAVEGAÇÃO ====================
+
+    /** Espera a tela inicial (login) carregar, no lugar do antigo pause(15000). */
+    public void validarTelaInicial() {
+        wait.waitForVisible(tituloLogin, TestConfig.DEFAULT_TIMEOUT);
+    }
+
     public void clicarNaoTemCadastro() {
-        click(btnNaoTemCad);
+        click(btnNaoTemCadastro);
     }
 
     public void clicarJaTenhoCadastro() {
-        hideKeyboard();
-        try {
-            click(btnJatenhoCad);
-        } catch (TimeoutException firstLocatorFailed) {
-            By textFallback = AppiumBy.androidUIAutomator(
-                    "new UiSelector().textContains(\"Já tenho cadastro\")");
-            try {
-                click(textFallback);
-            } catch (TimeoutException textLocatorFailed) {
-                By descriptionFallback = AppiumBy.androidUIAutomator(
-                        "new UiSelector().descriptionContains(\"Já tenho cadastro\")");
-                click(descriptionFallback);
-            }
+        click(btnJaTenhoCadastro);
+    }
+
+    /** Garante que a tela de cadastro está aberta, sem clicar de novo se já estiver nela. */
+    public void abrirTelaDeCadastro() {
+        if (!isVisible(tituloCadastro, TestConfig.SHORT_TIMEOUT)) {
+            clicarNaoTemCadastro();
         }
     }
 
-    public void preencherNome(String nome) {
-        sendKeys(newUserName, nome);
+    // ==================== PREENCHIMENTO ====================
+
+    public void preencherNome(String valor) {
+        preencher(campoNome, valor);
     }
 
-    public void preencherEmailCadastro(String email) {
-        sendKeys(newUserEmail, email);
+    public void preencherEmail(String valor) {
+        preencher(campoEmail, valor);
     }
 
-    public void preencherCelular(String celular) {
-        sendKeys(newUserCelular, celular);
+    public void preencherCelular(String valor) {
+        preencher(campoCelular, valor);
     }
 
-    public void preencherSenhaCadastro(String senha) {
-        sendKeys(newUserSenha, senha);
+    public void preencherSenha(String valor) {
+        preencher(campoSenha, valor);
     }
 
-    public void preencherConfirmacaoSenha(String senha) {
-        sendKeys(newUserConfirSenha, senha);
+    public void preencherConfirmacaoSenha(String valor) {
+        preencher(campoConfirmarSenha, valor);
     }
 
-    public String obterNome() {
-        return obterValorCampo(newUserName);
-    }
-
-    public String obterEmail() {
-        return obterValorCampo(newUserEmail);
-    }
-
-    public String obterCelular() {
-        return obterValorCampo(newUserCelular);
-    }
-
-    public String obterSenha() {
-        return obterValorCampo(newUserSenha);
-    }
-
-    public String obterConfirmacaoSenha() {
-        return obterValorCampo(newUserConfirSenha);
-    }
-
-    public boolean nomeEstaVisivel() {
-        return isVisible(newUserName);
-    }
-
-    public boolean emailEstaVisivel() {
-        return isVisible(newUserEmail);
-    }
-
-    public boolean celularEstaVisivel() {
-        return isVisible(newUserCelular);
-    }
-
-    public boolean senhaEstaVisivel() {
-        return isVisible(newUserSenha);
-    }
-
-    public boolean confirmacaoSenhaEstaVisivel() {
-        return isVisible(newUserConfirSenha);
+    public void preencherCadastroCompleto(Usuario u) {
+        preencherNome(u.nome());
+        preencherEmail(u.email());
+        preencherCelular(u.celular());
+        preencherSenha(u.senha());
+        preencherConfirmacaoSenha(u.senha());
     }
 
     public void limparTodosOsCampos() {
-        clearField(newUserName);
-        clearField(newUserEmail);
-        clearField(newUserCelular);
-        clearField(newUserSenha);
-        clearField(newUserConfirSenha);
+        limparCampoNome();
+        limparCampoEmail();
+        limparCampoCelular();
+        limparCampoSenha();
+        limparCampoConfirmacaoSenha();
     }
 
-    public void limparCampoNome() {
-        clearField(newUserName);
-    }
+    public void limparCampoNome() { limpar(campoNome); }
+    public void limparCampoEmail() { limpar(campoEmail); }
+    public void limparCampoCelular() { limpar(campoCelular); }
+    public void limparCampoSenha() { limpar(campoSenha); }
+    public void limparCampoConfirmacaoSenha() { limpar(campoConfirmarSenha); }
 
-    public void limparCampoEmail() {
-        clearField(newUserEmail);
-    }
-
-    public void limparCampoCelular() {
-        clearField(newUserCelular);
-    }
-
-    public void limparCampoSenha() {
-        clearField(newUserSenha);
-    }
-
-    public void limparCampoConfirmacaoSenha() {
-        clearField(newUserConfirSenha);
-    }
-
-    public boolean botaoCadastroInicialEstaVisivel() {
-        return isVisible(btnNaoTemCad);
-    }
-
-    public boolean botaoCadastroInicialEstaHabilitado() {
-        return isEnabled(btnNaoTemCad);
-    }
-
-    public boolean botaoQueroMeCadastrarEstaVisivel() {
-        return isVisible(btnConcluirCadastro);
-    }
-
-    public boolean botaoQueroMeCadastrarEstaHabilitado() {
-        return isEnabled(btnConcluirCadastro);
-    }
-
-    public boolean botaoJaTenhoCadastroEstaVisivel() {
-        return isVisible(btnJatenhoCad);
-    }
-
-    public boolean botaoJaTenhoCadastroEstaHabilitado() {
-        return isEnabled(btnJatenhoCad);
-    }
-
-    public void queroMeCadastrar() {
-        aceitarTermosSeNecessario();
+    public void concluirCadastro() {
         hideKeyboard();
-        click(btnConcluirCadastro);
+        aceitarTermosSeNecessario();
+        scrollToElement(btnQueroMeCadastrar, 3);
+        click(btnQueroMeCadastrar);
     }
 
     /**
-     * Algumas versões da app apresentam um checkbox de termos e outras não.
-     * A ausência do checkbox não deve impedir o submit; quando ele existe,
-     * deve ser marcado antes de clicar no botão de cadastro.
+     * Marca "Li e concordo com Termos e Politicas" quando o checkbox existir e estiver desmarcado.
+     * Não faz nada se a tela não tiver o checkbox (não toca no texto, que abriria os Termos).
      */
-    private void aceitarTermosSeNecessario() {
-        By checkbox = AppiumBy.androidUIAutomator(
-                "new UiSelector().className(\"android.widget.CheckBox\")"
-                        + ".descriptionContains(\"Termos\")");
-        List<WebElement> elementos = driver.findElements(checkbox);
-        if (elementos.isEmpty()) {
-            elementos = driver.findElements(AppiumBy.androidUIAutomator(
-                    "new UiSelector().className(\"android.widget.CheckBox\")"));
+    public void aceitarTermosSeNecessario() {
+        scrollToElement(checkboxTermos, 2);
+        By alvo = !driver.findElements(checkboxTermos).isEmpty() ? checkboxTermos : null;
+        if (alvo == null && driver.findElements(qualquerCheckbox).size() == 1) {
+            alvo = qualquerCheckbox; // único checkbox da tela: só pode ser o dos termos
         }
-        for (WebElement elemento : elementos) {
-            if (elemento.isDisplayed() && !elemento.isSelected() && elemento.isEnabled()) {
-                elemento.click();
-                return;
+        if (alvo != null) {
+            WebElement caixa = driver.findElement(alvo);
+            if (!"true".equals(caixa.getAttribute("checked"))) {
+                caixa.click();
             }
         }
     }
 
-    public void validarTelaInicial() {
-        wait.waitForVisible(telaInicial);
+    // ==================== LEITURA ====================
+
+    public String obterNome() { return obterValor(campoNome); }
+    public String obterEmail() { return obterValor(campoEmail); }
+    public String obterCelular() { return obterValor(campoCelular); }
+    public String obterSenha() { return obterValor(campoSenha); }
+    public String obterConfirmacaoSenha() { return obterValor(campoConfirmarSenha); }
+
+    // ==================== VALIDAÇÕES ====================
+
+    public boolean nomeEstaVisivel() { return estaVisivel(campoNome); }
+    public boolean emailEstaVisivel() { return estaVisivel(campoEmail); }
+    public boolean celularEstaVisivel() { return estaVisivel(campoCelular); }
+    public boolean senhaEstaVisivel() { return estaVisivel(campoSenha); }
+    public boolean confirmacaoSenhaEstaVisivel() { return estaVisivel(campoConfirmarSenha); }
+
+    public boolean botaoNaoTemCadastroEstaVisivel() { return estaVisivel(btnNaoTemCadastro); }
+    public boolean botaoNaoTemCadastroEstaHabilitado() { return estaHabilitado(btnNaoTemCadastro); }
+    public boolean botaoJaTenhoCadastroEstaVisivel() { return estaVisivel(btnJaTenhoCadastro); }
+    public boolean botaoJaTenhoCadastroEstaHabilitado() { return estaHabilitado(btnJaTenhoCadastro); }
+
+    public boolean botaoQueroMeCadastrarEstaVisivel() {
+        hideKeyboard();
+        return isVisible(btnQueroMeCadastrar, TestConfig.DEFAULT_TIMEOUT);
     }
 
-    public boolean existeMensagemDeErro() {
-        return existeMensagem("obrigatório")
-                || existeMensagem("inválido")
-                || existeMensagem("não são iguais");
-    }
+    public boolean botaoQueroMeCadastrarEstaHabilitado() { return estaHabilitado(btnQueroMeCadastrar); }
 
-    public boolean existeMensagem(String texto) {
-        String escaped = texto.replace("\\", "\\\\").replace("\"", "\\\"");
-        By locator = AppiumBy.androidUIAutomator(
-                "new UiSelector().textContains(\"" + escaped + "\")");
-        return !driver.findElements(locator).isEmpty();
+    public boolean telaDeCadastroEstaApresentada() {
+        return isVisible(tituloCadastro, TestConfig.DEFAULT_TIMEOUT);
     }
 
     public boolean telaDeLoginEstaApresentada() {
-        return !driver.findElements(btnEntrar).isEmpty()
-                || !driver.findElements(emailFieldForLogin()).isEmpty();
+        return isVisible(tituloLogin, TestConfig.DEFAULT_TIMEOUT);
     }
 
-    public boolean telaDeCadastroEstaApresentada() {
+    public boolean existeMensagemDeErro() {
+        return existeMensagem("E-mail inválido") || existeMensagem("não correspondem")
+                || existeMensagem("Informe o número");
+    }
+
+    /** Aguarda até 3s por uma mensagem (content-desc ou text) que contenha o trecho informado. */
+    public boolean existeMensagem(String trecho) {
+        return aguardarMensagem(trecho, TestConfig.SHORT_TIMEOUT);
+    }
+
+    public boolean aguardarMensagem(String trecho, long segundos) {
+        return isVisible(descricaoContem(trecho), segundos) || isVisible(textoContem(trecho), 1);
+    }
+
+    /** Checagem imediata (sem espera) para asserções negativas. */
+    public boolean mensagemEstaPresenteAgora(String trecho) {
+        return !driver.findElements(descricaoContem(trecho)).isEmpty()
+                || !driver.findElements(textoContem(trecho)).isEmpty();
+    }
+
+    /**
+     * Aguarda o resultado do envio do cadastro.
+     * SUCESSO: saiu da tela de cadastro sem erro nem pedido de SMS.
+     * EXIGE_CODIGO_SMS: o app pediu verificação por SMS (o app v2.0.0 possui esse fluxo).
+     * ERRO_VALIDACAO: apareceu mensagem de validação e a tela de cadastro permaneceu.
+     */
+    public ResultadoCadastro aguardarResultadoCadastro(long segundos) {
+        long limite = System.currentTimeMillis() + segundos * 1000;
+        while (System.currentTimeMillis() < limite) {
+            if (pediuCodigoSms()) {
+                return ResultadoCadastro.EXIGE_CODIGO_SMS;
+            }
+            if (driver.findElements(tituloCadastro).isEmpty()) {
+                pause(1000); // a verificação por SMS pode abrir logo após a troca de tela
+                return pediuCodigoSms() ? ResultadoCadastro.EXIGE_CODIGO_SMS : ResultadoCadastro.SUCESSO;
+            }
+            if (mensagemEstaPresenteAgora("E-mail inválido") || mensagemEstaPresenteAgora("não correspondem")
+                    || mensagemEstaPresenteAgora("Informe o número") || mensagemEstaPresenteAgora("já cadastrad")
+                    || mensagemEstaPresenteAgora("já existe")) {
+                return ResultadoCadastro.ERRO_VALIDACAO;
+            }
+            pause(500);
+        }
+        return ResultadoCadastro.TIMEOUT;
+    }
+
+    /** Verdadeiro se o app avançou para a etapa de telefone/SMS. */
+    public boolean pediuCodigoSms() {
+        return mensagemEstaPresenteAgora("código enviado por SMS")
+                || mensagemEstaPresenteAgora("Qual o número do seu celular")
+                || mensagemEstaPresenteAgora("Reenviar o código");
+    }
+
+    /** O cadastro NÃO foi concluído: permaneceu no formulário (com ou sem mensagem). */
+    public boolean cadastroNaoFoiConcluido() {
+        ResultadoCadastro r = aguardarResultadoCadastro(5);
+        return r == ResultadoCadastro.ERRO_VALIDACAO || r == ResultadoCadastro.TIMEOUT;
+    }
+
+    // ==================== INTERNOS ====================
+
+    private static By campoTexto(int instancia) {
+        return AppiumBy.androidUIAutomator(
+                "new UiSelector().className(\"android.widget.EditText\").instance(" + instancia + ")");
+    }
+
+    private static By descricaoContem(String trecho) {
+        return AppiumBy.androidUIAutomator("new UiSelector().descriptionContains(\"" + escapar(trecho) + "\")");
+    }
+
+    private static By textoContem(String trecho) {
+        return AppiumBy.androidUIAutomator("new UiSelector().textContains(\"" + escapar(trecho) + "\")");
+    }
+
+    private static String escapar(String texto) {
+        return texto.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private void preencher(By locator, String valor) {
+        WebElement elemento = wait.waitForVisible(locator);
+        elemento.click();
+        elemento.clear();
+        elemento.sendKeys(valor);
+    }
+
+    private void limpar(By locator) {
+        WebElement elemento = wait.waitForVisible(locator);
+        elemento.click();
+        elemento.clear();
+    }
+
+    private String obterValor(By locator) {
+        WebElement elemento = wait.waitForVisible(locator);
+        String text = elemento.getText();
+        if (text != null && !text.isBlank()) {
+            return text;
+        }
+        String value = elemento.getAttribute("text");
+        return value == null ? "" : value;
+    }
+
+    private boolean estaVisivel(By locator) {
         try {
-            wait.waitForVisible(telaCadastro);
-            return true;
-        } catch (TimeoutException exception) {
+            return wait.waitForVisible(locator).isDisplayed();
+        } catch (Exception e) {
             return false;
         }
     }
 
-    public boolean senhaEstaMascarada(String campo) {
-        By locator = switch (campo) {
-            case "Senha" -> newUserSenha;
-            case "Confirmar senha" -> newUserConfirSenha;
-            default -> throw new IllegalArgumentException("Campo de senha não mapeado: " + campo);
-        };
-        WebElement element = wait.waitForVisible(locator);
-        return "true".equalsIgnoreCase(element.getAttribute("password"));
-    }
-
-    public void campoNomeClick() {
-        click(newUserName);
-    }
-
-    private By emailFieldForLogin() {
-        return AppiumBy.androidUIAutomator(
-                "new UiSelector().className(\"android.widget.EditText\").instance(0)");
-    }
-
-    private String obterValorCampo(By locator) {
-        WebElement element = wait.waitForVisible(locator);
-        String value = element.getAttribute("text");
-        if (value != null && !value.isBlank()) {
-            return value;
+    private boolean estaHabilitado(By locator) {
+        try {
+            return wait.waitForVisible(locator).isEnabled();
+        } catch (Exception e) {
+            return false;
         }
-        value = element.getText();
-        return value == null ? "" : value;
     }
-
-
 }
