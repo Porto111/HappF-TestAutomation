@@ -2,15 +2,13 @@
 
 Projeto de automação Android com **Java 17, Maven, Appium, Selenium e Cucumber**. Os cenários são escritos em Gherkin em português.
 
-> **Estado desta entrega:** o projeto foi ajustado para validar apenas a jornada do utilizador final. `mvn clean test -Dcucumber.execution.dry-run=true` deve ser executado novamente após esta remoção de escopo para confirmar todos os bindings. Não foi possível executar a aplicação num dispositivo real nem concluir uma compra: o ZIP não contém o APK/código da aplicação, e o ambiente de trabalho não tinha dispositivo Android, ADB ou servidor Appium.
-
 ## Objetivo e âmbito
 
 O escopo atual cobre **cadastro, autenticação e consulta de produtos** na perspetiva do utilizador final. Foram removidos os cenários, steps e page objects de gestão administrativa de produtos: criação, edição, exclusão e fluxo completo de CRUD.
 
 A feature de cadastro cria um e-mail aleatório no domínio de teste configurado e um número de telemóvel com formato brasileiro. A conta é criada no backend ao executar o cenário positivo; por isso, este cenário está marcado `@staging @mutates-data` e deve ser executado apenas contra uma instalação de teste ligada a um backend de staging.
 
-A **compra com o utilizador recém-criado continua por implementar e por executar**.
+A **compra com o utilizador recém-criado está sendo construída**.
 
 ## Estrutura
 
