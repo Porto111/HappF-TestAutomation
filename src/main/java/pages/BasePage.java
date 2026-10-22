@@ -30,17 +30,12 @@ public class BasePage {
 
 
 
-    /**
-     * Click on element using locator
-     */
     protected void click(By locator) {
         wait.waitForClickable(locator);
         driver.findElement(locator).click();
     }
 
-    /**
-     * Type text into element (clears first)
-     */
+
     protected void sendKeys(By locator, String text) {
         wait.waitForVisible(locator);
         WebElement element = driver.findElement(locator);
@@ -48,17 +43,13 @@ public class BasePage {
         element.sendKeys(text);
     }
 
-    /**
-     * Type text without clearing first
-     */
+
     protected void typeText(By locator, String text) {
         wait.waitForVisible(locator);
         driver.findElement(locator).sendKeys(text);
     }
 
-    /**
-     * Clear text field
-     */
+
     protected void clearField(By locator) {
         wait.waitForVisible(locator);
         driver.findElement(locator).clear();
@@ -66,23 +57,17 @@ public class BasePage {
 
     // ==================== ELEMENT QUERIES ====================
 
-    /**
-     * Check if element is visible
-     */
+
     protected boolean isVisible(By locator) {
         return wait.isVisibleWithin(locator, config.TestConfig.DEFAULT_TIMEOUT);
     }
 
-    /**
-     * Check if element becomes visible within the given seconds (use for negative checks / scroll loops)
-     */
+
     protected boolean isVisible(By locator, long seconds) {
         return wait.isVisibleWithin(locator, seconds);
     }
 
-    /**
-     * Check if element exists in DOM (may not be visible)
-     */
+
     protected boolean exists(By locator) {
         try {
             driver.findElement(locator);
@@ -92,9 +77,6 @@ public class BasePage {
         }
     }
 
-    /**
-     * Check if element is enabled
-     */
     protected boolean isEnabled(By locator) {
         try {
             return driver.findElement(locator).isEnabled();
@@ -104,7 +86,7 @@ public class BasePage {
     }
 
     /**
-     * Check if element is selected (checkboxes, radio buttons)
+     * Checagem de elementos selecionados/flegados (checkboxes, radio buttons)
      */
     protected boolean isSelected(By locator) {
         try {
@@ -116,24 +98,20 @@ public class BasePage {
 
     // ==================== TEXT OPERATIONS ====================
 
-    /**
-     * Get text from element
-     */
+
     protected String getText(By locator) {
         wait.waitForVisible(locator);
         return driver.findElement(locator).getText();
     }
 
-    /**
-     * Get attribute value from element
-     */
+
     protected String getAttribute(By locator, String attribute) {
         wait.waitForVisible(locator);
         return driver.findElement(locator).getAttribute(attribute);
     }
 
     /**
-     * Check if element contains specific text
+     * Checagem de texto específico
      */
     protected boolean containsText(By locator, String expectedText) {
         try {
@@ -146,24 +124,18 @@ public class BasePage {
 
     // ==================== LIST OPERATIONS ====================
 
-    /**
-     * Get all elements matching locator
-     */
     protected List<WebElement> getElements(By locator) {
         wait.waitForVisible(locator);
         return driver.findElements(locator);
     }
 
-    /**
-     * Get count of elements
-     */
+
     protected int getElementCount(By locator) {
+
         return driver.findElements(locator).size();
     }
 
-    /**
-     * Find element by text in a list
-     */
+
     protected WebElement findElementByText(By listLocator, String text) {
         List<WebElement> elements = getElements(listLocator);
         return elements.stream()
@@ -175,7 +147,7 @@ public class BasePage {
     // ==================== TOUCH ACTIONS - COORDINATES ====================
 
     /**
-     * Tap at specific coordinates
+     * Toque através de coordenadas
      */
     public void tap(int x, int y) {
         PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
@@ -189,14 +161,14 @@ public class BasePage {
     }
 
     /**
-     * Tap at Point
+     * Toque por ponto ordenado
      */
     protected void tap(Point p) {
         tap(p.getX(), p.getY());
     }
 
     /**
-     * Tap using percentage of screen (device-independent)
+     * Toque usando uma porcentagem da tela (independente do dispositivo)
      * @param xPercent 0.0 to 1.0 (e.g., 0.5 = center)
      * @param yPercent 0.0 to 1.0 (e.g., 0.5 = center)
      */
@@ -207,9 +179,7 @@ public class BasePage {
         tap(x, y);
     }
 
-    /**
-     * Long press on element
-     */
+
     protected void longPress(By locator, Duration duration) {
         WebElement element = driver.findElement(locator);
         Point location = element.getLocation();
@@ -229,9 +199,7 @@ public class BasePage {
 
     // ==================== SCROLL ACTIONS ====================
 
-    /**
-     * Scroll down on screen
-     */
+
     public void scrollDown() {
         Dimension size = driver.manage().window().getSize();
         int startX = size.width / 2;
@@ -240,9 +208,7 @@ public class BasePage {
         swipe(startX, startY, startX, endY, Duration.ofMillis(1000));
     }
 
-    /**
-     * Scroll up on screen
-     */
+
     public void scrollUp() {
         Dimension size = driver.manage().window().getSize();
         int startX = size.width / 2;
@@ -251,9 +217,7 @@ public class BasePage {
         swipe(startX, startY, startX, endY, Duration.ofMillis(1000));
     }
 
-    /**
-     * Scroll to element until visible
-     */
+
     protected void scrollToElement(By locator, int maxScrolls) {
         for (int i = 0; i < maxScrolls; i++) {
             if (isVisible(locator, config.TestConfig.SHORT_TIMEOUT)) {
@@ -264,9 +228,7 @@ public class BasePage {
         throw new RuntimeException("Element not found after " + maxScrolls + " scrolls: " + locator);
     }
 
-    /**
-     * Scroll horizontally (left to right)
-     */
+
     public void scrollRight() {
         Dimension size = driver.manage().window().getSize();
         int startX = (int) (size.width * 0.8);
@@ -275,9 +237,7 @@ public class BasePage {
         swipe(startX, y, endX, y, Duration.ofMillis(800));
     }
 
-    /**
-     * Scroll horizontally (right to left)
-     */
+
     public void scrollLeft() {
         Dimension size = driver.manage().window().getSize();
         int startX = (int) (size.width * 0.2);
@@ -286,9 +246,7 @@ public class BasePage {
         swipe(startX, y, endX, y, Duration.ofMillis(800));
     }
 
-    /**
-     * Generic swipe action
-     */
+
     private void swipe(int startX, int startY, int endX, int endY, Duration duration) {
         PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
         Sequence swipe = new Sequence(finger, 1);
@@ -303,9 +261,7 @@ public class BasePage {
 
     // ==================== UTILITY METHODS ====================
 
-    /**
-     * Wait/pause execution
-     */
+
     public void pause(long millis) {
         try {
             Thread.sleep(millis);
@@ -314,40 +270,31 @@ public class BasePage {
         }
     }
 
-    /**
-     * Hide keyboard if visible
-     */
+
     protected void hideKeyboard() {
         try {
-            // Só esconde se o teclado estiver aberto: pressionar BACK sem teclado
-            // navega para a tela anterior (ou fecha o app) e quebra o fluxo.
-            Object shown = driver.executeScript("mobile: isKeyboardShown");
-            if (Boolean.TRUE.equals(shown)) {
-                driver.executeScript("mobile: hideKeyboard");
-            }
-        } catch (Exception ignored) {
+            driver.executeScript(
+                    "mobile: pressKey",
+                    java.util.Map.of("keycode", 4)
+            );
+        }  catch (Exception ignored) {
             // Comando indisponível: segue o fluxo sem esconder o teclado
         }
     }
 
-    /**
-     * Get screen dimensions
-     */
+
     protected Dimension getScreenSize() {
+
         return driver.manage().window().getSize();
     }
 
-    /**
-     * Take screenshot
-     */
     protected byte[] takeScreenshot() {
+
         return driver.getScreenshotAs(org.openqa.selenium.OutputType.BYTES);
     }
 
-    /**
-     * Navigate back (Android back button)
-     */
     protected void navigateBack() {
+
         driver.navigate().back();
     }
 }

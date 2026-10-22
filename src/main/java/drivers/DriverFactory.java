@@ -4,66 +4,66 @@ import config.TestConfig;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
 
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Duration;
 
-public class DriverFactory {
-
+/** Cria e gere a sessão Android utilizada pelo cenário Cucumber atual. */
+public final class DriverFactory {
     private static AndroidDriver driver;
 
-    public static AndroidDriver getDriver() {
+    private DriverFactory() {
+    }
+
+    public static synchronized AndroidDriver getDriver() {
         if (driver == null) {
             createDriver();
         }
         return driver;
     }
 
-    public static boolean hasDriver() {
-        return driver != null;
+    /** Permite aos hooks recolher evidências sem criar uma nova sessão. */
+    public static synchronized AndroidDriver peekDriver() {
+        return driver;
     }
 
     private static void createDriver() {
-        System.out.println("INICIANDO SESSÃO APPIUM -> " + TestConfig.APPIUM_URL
-                + " | device=" + TestConfig.DEVICE_NAME
-                + " | package=" + TestConfig.APP_PACKAGE);
+        System.out.println("A iniciar sessão Appium em " + TestConfig.APPIUM_URL
+                + " | dispositivo=" + TestConfig.DEVICE_NAME
+                + " | app=" + TestConfig.APP_PACKAGE
+                + " | noReset=" + TestConfig.NO_RESET);
 
         UiAutomator2Options options = new UiAutomator2Options()
-                .setDeviceName(TestConfig.DEVICE_NAME)
                 .setPlatformName(TestConfig.PLATFORM_NAME)
-                .setAutomationName("UiAutomator2")
+                .setDeviceName(TestConfig.DEVICE_NAME)
+                .setAutomationName("UIAutomator2")
                 .setAppPackage(TestConfig.APP_PACKAGE)
                 .setAppActivity(TestConfig.APP_ACTIVITY)
-                // Apps com splash/trampolim podem trocar de Activity logo após abrir
-                .setAppWaitActivity("*")
-                // Antes estava fixo em true, ignorando TestConfig.NO_RESET:
-                // o app mantinha a sessão logada e o fluxo de cadastro nunca partia do zero.
                 .setNoReset(TestConfig.NO_RESET)
                 .setAutoGrantPermissions(TestConfig.AUTO_GRANT_PERMISSIONS)
-                .setAppWaitForLaunch(true)
-                .setNewCommandTimeout(Duration.ofSeconds(120));
-
+                .setAppWaitForLaunch(true);
         if (!TestConfig.DEVICE_UDID.isBlank()) {
             options.setUdid(TestConfig.DEVICE_UDID);
         }
 
         try {
             driver = new AndroidDriver(new URL(TestConfig.APPIUM_URL), options);
-            System.out.println("APPIUM DRIVER CRIADO - Session ID: " + driver.getSessionId());
-        } catch (MalformedURLException e) {
-            throw new IllegalStateException("URL do Appium inválida: " + TestConfig.APPIUM_URL, e);
-        } catch (Exception e) {
-            throw new IllegalStateException("Não foi possível iniciar o Appium Driver", e);
+            System.out.println("Sessão Appium iniciada. Session ID: " + driver.getSessionId());
+        } catch (Exception exception) {
+            driver = null;
+            throw new IllegalStateException(
+                    "Não foi possível iniciar o Appium Driver. Confirme APPIUM_URL, dispositivo, "
+                            + "Appium/UiAutomator2 e APP_PACKAGE/APP_ACTIVITY.",
+                    exception);
         }
     }
 
-    public static void quitDriver() {
-        if (driver != null) {
-            try {
-                driver.quit();
-            } finally {
-                driver = null;
-            }
+    public static synchronized void quitDriver() {
+        if (driver == null) {
+            return;
+        }
+        try {
+            driver.quit();
+        } finally {
+            driver = null;
         }
     }
 }

@@ -1,9 +1,15 @@
 # IDE
-/.idea/shelf/
-/.idea/workspace.xml
-/workspace.xml
+.idea/
+*.iml
 
-# Build / relatórios
+# Ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# Build / relatórios / evidências
 target/
 allure-results/
 allure-report/
+*.log
+screenshots/

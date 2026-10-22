@@ -1,6 +1,7 @@
 package hooks;
 
 import drivers.DriverFactory;
+import io.appium.java_client.android.AndroidDriver;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
@@ -9,32 +10,34 @@ import utils.ScenarioContext;
 
 public class Hooks {
 
-    @Before
-    public void iniciarSessao(Scenario scenario) {
-        System.out.println("========== INICIANDO: " + scenario.getName() + " ==========");
-        ScenarioContext.reset();
-        if (DriverFactory.getDriver() == null) {
+    @Before(order = 0)
+    public void iniciarSessao() {
+        AndroidDriver driver =DriverFactory.getDriver();
+        //ScenarioContext.reset();
+        if (driver == null) {
             throw new IllegalStateException("Não foi possível inicializar o AppiumDriver.");
         }
     }
 
-    @After
+    @After(order = 100)
     public void finalizarSessao(Scenario scenario) {
         try {
-            if (scenario.isFailed() && DriverFactory.hasDriver()) {
-                byte[] print = DriverFactory.getDriver().getScreenshotAs(OutputType.BYTES);
-                scenario.attach(print, "image/png", "Screenshot da falha");
-                // XML da tela: permite descobrir o locator real de qualquer elemento sem reabrir o Inspector
-                String xml = DriverFactory.getDriver().getPageSource();
-                scenario.attach(xml.getBytes(java.nio.charset.StandardCharsets.UTF_8),
-                        "text/xml", "Page source da falha");
+            AndroidDriver driver = DriverFactory.peekDriver();
+            if (scenario.isFailed() && driver != null) {
+                try {
+                    scenario.attach(
+                            driver.getScreenshotAs(OutputType.BYTES),
+                            "image/png",
+                            "screenshot-falha-" + scenario.getName());
+                } catch (Exception screenshotException) {
+                    System.err.println("Não foi possível anexar screenshot: "
+                            + screenshotException.getMessage());
+                }
             }
-        } catch (Exception e) {
-            System.err.println("Não foi possível capturar screenshot: " + e.getMessage());
         } finally {
             DriverFactory.quitDriver();
-            ScenarioContext.reset();
-            System.out.println("========== FINALIZADO: " + scenario.getStatus() + " ==========");
         }
     }
+
 }
+

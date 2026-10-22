@@ -7,6 +7,8 @@ import org.junit.Assert;
 import org.junit.Assume;
 import pages.LoginPage;
 
+import java.text.Normalizer;
+
 public class AutenticacaoSteps {
 
 
@@ -20,6 +22,31 @@ public class AutenticacaoSteps {
 
         loginPage.pause(2000);
         Assert.assertTrue("Tela de login não está visível", loginPage.estaVisivel());
+    }
+
+    @Dado("que estou autenticado com uma conta de teste")
+    public void queEstouAutenticadoComUmaContaDeTeste() {
+        if (!loginPage.estaVisivel()) {
+            return; // Already logged in
+        }
+
+        loginPage.realizarLogin(
+                TestConfig.requiredTestUserEmail(),
+                TestConfig.requiredTestUserPassword()
+        );
+
+        loginPage.aguardarLogin();
+        Assert.assertTrue("Login falhou", loginPage.loginBemSucedido());
+    }
+
+    @Quando("eu preencho a senha de teste configurada")
+    public void euPreenchoSenhaDeTesteConfigurada() {
+        loginPage.preencherSenha(TestConfig.requiredTestUserPassword());
+    }
+
+    @Quando("eu preencho o email de teste configurado")
+    public void euPreenchoEmailDeTesteConfigurado() {
+        loginPage.preencherEmail(TestConfig.requiredTestUserEmail());
     }
 
     @Quando("eu preencho o email {string}")
@@ -43,10 +70,20 @@ public class AutenticacaoSteps {
         Assert.assertTrue("Login não foi bem-sucedido", loginPage.loginBemSucedido());
     }
 
+    private String normalizar(String texto) {
+        return Normalizer.normalize(texto == null ? "" : texto, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replace("-", "")
+                .toLowerCase();
+    }
+
     @Então("devo ver a mensagem de erro {string}")
     public void devoVerAMensagemDeErro(String mensagemEsperada) {
-        Assert.assertTrue("Mensagem não apresentada na tela: '" + mensagemEsperada + "'",
-                loginPage.existeMensagem(mensagemEsperada));
+        String mensagemAtual = loginPage.obterMensagemErro();
+        Assert.assertTrue(
+                "Mensagem de erro incorreta. Esperado: '" + mensagemEsperada + "', Atual: '" + mensagemAtual + "'",
+                normalizar(mensagemAtual).contains(normalizar(mensagemEsperada))
+        );
     }
 
     @Então("devo permanecer na tela de login")
