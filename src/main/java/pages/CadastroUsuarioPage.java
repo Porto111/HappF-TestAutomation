@@ -26,12 +26,8 @@ public class CadastroUsuarioPage extends BasePage {
     private final By campoSenha = campoTexto(3);
     private final By campoConfirmarSenha = campoTexto(4);
 
-    private final By btnNaoTemCadastro = By.xpath(
-            "//android.widget.Button[@content-desc=\"Não tem cadastro? Cadastrar\"]");
-    private final By btnJaTenhoCadastro = By.xpath(
-            "//android.widget.Button[@content-desc=\"Já tenho cadastro. Fazer login\"]");
-    private final By btnQueroMeCadastrar = By.xpath(
-            "//android.widget.Button[@content-desc=\"Quero me cadastrar\"]");
+    private final By btnNaoTemCadastro = AppiumBy.accessibilityId("Não tem cadastro? Cadastrar");    private final By btnJaTenhoCadastro = By.xpath("//android.widget.Button[@content-desc=\"Já tenho cadastro. Fazer login\"]");
+    private final By btnQueroMeCadastrar = By.xpath("//android.widget.Button[@content-desc=\"Quero me cadastrar\"]");
 
     // "Li e concordo com Termos e Politicas" (texto confirmado no app). Checkbox nativo do Flutter.
     private final By checkboxTermos = By.xpath(

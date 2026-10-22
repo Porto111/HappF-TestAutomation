@@ -4,6 +4,7 @@ import config.TestConfig;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * Tela de login do Happ Fé (Flutter: rótulos expostos em content-desc).
@@ -27,7 +28,8 @@ public class LoginPage extends BasePage {
     private final By btnEntrar = AppiumBy.accessibilityId("Entrar");
     private final By btnNaoTemCadastro = AppiumBy.accessibilityId("Não tem cadastro? Cadastrar");
     private final By esqueceuSenhaLink = AppiumBy.accessibilityId("Esqueci a senha");
-    //private final By btnCadastrar = AppiumBy.accessibilityId("Quero me cadastrar");
+    private final By loadingSpinner = By.id(TestConfig.APP_PACKAGE + ":id/loading_spinner");
+
     // ==================== ACTIONS ====================
 
     public void preencherEmail(String email) {
@@ -61,17 +63,24 @@ public class LoginPage extends BasePage {
 
     // ==================== VALIDATIONS ====================
 
+    public boolean estaCarregando() {
+        return driver.findElements(loadingSpinner)
+                .stream()
+                .anyMatch(WebElement::isDisplayed);
+    }
+
+
     /** Espera o resultado da tentativa de login (tela de login some ou aparece mensagem de erro). */
     public void aguardarLogin() {
-        long limite = System.currentTimeMillis() + 15_000;
-        while (System.currentTimeMillis() < limite) {
-            if (driver.findElements(btnEntrar).isEmpty() || existeMensagemAgora("Erro ao efetuar")
-                    || existeMensagemAgora("inválid")) {
-                return;
-            }
-            pause(500);
+        long deadline =
+                System.nanoTime()
+                        + java.time.Duration.ofSeconds(15).toNanos();
+
+        while (estaCarregando() && System.nanoTime() < deadline) {
+            pause(250);
         }
     }
+
 
     /** Login bem-sucedido = botão "Entrar" desapareceu. */
     public boolean loginBemSucedido() {
