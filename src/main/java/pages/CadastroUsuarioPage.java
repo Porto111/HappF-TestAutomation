@@ -26,7 +26,8 @@ public class CadastroUsuarioPage extends BasePage {
     private final By campoSenha = campoTexto(3);
     private final By campoConfirmarSenha = campoTexto(4);
 
-    private final By btnNaoTemCadastro = AppiumBy.accessibilityId("Não tem cadastro? Cadastrar");    private final By btnJaTenhoCadastro = By.xpath("//android.widget.Button[@content-desc=\"Já tenho cadastro. Fazer login\"]");
+    private final By btnNaoTemCadastro = AppiumBy.accessibilityId("Não tem cadastro? Cadastrar");
+    private final By btnJaTenhoCadastro = By.xpath("//android.widget.Button[@content-desc=\"Já tenho cadastro. Fazer login\"]");
     private final By btnQueroMeCadastrar = By.xpath("//android.widget.Button[@content-desc=\"Quero me cadastrar\"]");
 
     // "Li e concordo com Termos e Politicas" (texto confirmado no app). Checkbox nativo do Flutter.
@@ -110,7 +111,6 @@ public class CadastroUsuarioPage extends BasePage {
     public void concluirCadastro() {
         hideKeyboard();
         aceitarTermosSeNecessario();
-        scrollToElement(btnQueroMeCadastrar, 3);
         click(btnQueroMeCadastrar);
     }
 
@@ -119,7 +119,6 @@ public class CadastroUsuarioPage extends BasePage {
      * Não faz nada se a tela não tiver o checkbox (não toca no texto, que abriria os Termos).
      */
     public void aceitarTermosSeNecessario() {
-        scrollToElement(checkboxTermos, 2);
         By alvo = !driver.findElements(checkboxTermos).isEmpty() ? checkboxTermos : null;
         if (alvo == null && driver.findElements(qualquerCheckbox).size() == 1) {
             alvo = qualquerCheckbox; // único checkbox da tela: só pode ser o dos termos
@@ -130,6 +129,29 @@ public class CadastroUsuarioPage extends BasePage {
                 caixa.click();
             }
         }
+    }
+
+    /** Mantém o método com o mesmo vocabulário usado nos cenários Gherkin. */
+    public void queroMeCadastrar() {
+        concluirCadastro();
+    }
+
+    public boolean botaoCadastroInicialEstaVisivel() {
+        return estaVisivel(btnNaoTemCadastro);
+    }
+
+    public boolean botaoCadastroInicialEstaHabilitado() {
+        return estaHabilitado(btnNaoTemCadastro);
+    }
+
+    /** Valida o atributo de password do Android sem depender do valor exibido. */
+    public boolean senhaEstaMascarada(String campo) {
+        By locator = "Senha".equals(campo) ? campoSenha : campoConfirmarSenha;
+        WebElement elemento = driver.findElement(locator);
+        String password = elemento.getAttribute("password");
+        String inputType = elemento.getAttribute("inputType");
+        return "true".equalsIgnoreCase(password)
+                || (inputType != null && inputType.toLowerCase().contains("password"));
     }
 
     // ==================== LEITURA ====================

@@ -101,6 +101,7 @@
                 <configuration>
                     <includes>
                         <include>**/runners/*Runner.java</include>
+                        <include>**/*Test.java</include>
                     </includes>
                     <systemPropertyVariables>
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>

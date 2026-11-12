@@ -55,15 +55,16 @@ public class CadastroUsuarioSteps {
         abrirCadastroSeNecessario();
         switch (campo) {
             case "Nome" -> cadastro.preencherNome(valor);
-            case "E-mail" -> cadastro.preencherEmailCadastro(valor);
+            case "E-mail" -> cadastro.preencherEmail(valor);
             case "Celular" -> cadastro.preencherCelular(valor);
-            case "Senha" -> cadastro.preencherSenhaCadastro(valor);
+            case "Senha" -> cadastro.preencherSenha(valor);
             case "Confirmar senha" -> cadastro.preencherConfirmacaoSenha(valor);
             default -> Assert.fail("Campo não mapeado: " + campo);
         }
     }
 
     @Quando("o usuário preencher um cadastro válido com dados exclusivos")
+    @Quando("o usuário preencher o cadastro com os dados de um novo usuário único")
     public void usuarioPreencherCadastroUnico() {
         abrirCadastroSeNecessario();
         String uniqueId = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
@@ -77,9 +78,9 @@ public class CadastroUsuarioSteps {
                 : TestConfig.TEST_USER_PHONE;
 
         cadastro.preencherNome("QA Mobile " + uniqueId.substring(0, 6));
-        cadastro.preencherEmailCadastro(email);
+        cadastro.preencherEmail(email);
         cadastro.preencherCelular(phone);
-        cadastro.preencherSenhaCadastro(TestConfig.NEW_USER_TEST_PASSWORD);
+        cadastro.preencherSenha(TestConfig.NEW_USER_TEST_PASSWORD);
         cadastro.preencherConfirmacaoSenha(TestConfig.NEW_USER_TEST_PASSWORD);
     }
 
@@ -107,13 +108,13 @@ public class CadastroUsuarioSteps {
         abrirCadastroSeNecessario();
         cadastro.preencherNome("QA Validação");
         if (cadastro.obterEmail().isBlank()) {
-            cadastro.preencherEmailCadastro("qa-validacao@example.test");
+            cadastro.preencherEmail("qa-validacao@example.test");
         }
         if (cadastro.obterCelular().isBlank()) {
             cadastro.preencherCelular("11999999999");
         }
         if (cadastro.obterSenha().isBlank()) {
-            cadastro.preencherSenhaCadastro(TestConfig.NEW_USER_TEST_PASSWORD);
+            cadastro.preencherSenha(TestConfig.NEW_USER_TEST_PASSWORD);
         }
         if (cadastro.obterConfirmacaoSenha().isBlank()) {
             cadastro.preencherConfirmacaoSenha(TestConfig.NEW_USER_TEST_PASSWORD);
@@ -123,13 +124,13 @@ public class CadastroUsuarioSteps {
     @Quando("o usuário tentar concluir o cadastro")
     public void usuarioTentarConcluirCadastro() {
         abrirCadastroSeNecessario();
-        cadastro.queroMeCadastrar();
+        cadastro.concluirCadastro();
     }
 
     @Quando("o usuário concluir o cadastro")
     public void usuarioConcluirCadastro() {
         abrirCadastroSeNecessario();
-        cadastro.queroMeCadastrar();
+        cadastro.concluirCadastro();
     }
 
     @Então("a tela de cadastro deve ser apresentada")
@@ -255,8 +256,16 @@ public class CadastroUsuarioSteps {
 
     @Então("o cadastro do usuário deve ser realizado com sucesso")
     public void cadastroRealizadoComSucesso() {
-        Assert.assertTrue("Não foi encontrada confirmação de sucesso do cadastro.",
-                cadastro.existeMensagem("sucesso"));
+        CadastroUsuarioPage.ResultadoCadastro resultado =
+                cadastro.aguardarResultadoCadastro(TestConfig.DEFAULT_TIMEOUT);
+        Assert.assertEquals("O cadastro não avançou com sucesso.",
+                CadastroUsuarioPage.ResultadoCadastro.SUCESSO, resultado);
+    }
+
+    @Então("o cadastro não deve ser concluído")
+    public void cadastroNaoDeveSerConcluido() {
+        Assert.assertTrue("O cadastro foi concluído indevidamente.",
+                cadastro.cadastroNaoFoiConcluido());
     }
 
     @Então("o aplicativo deve apresentar a confirmação do cadastro")
