@@ -4,35 +4,35 @@ public class TestConfig {
 
     // ==================== Appium Server / Device ====================
     // Podem ser sobrescritos via -Dappium.url=... -Ddevice.name=... -Ddevice.udid=...
-    public static final String APPIUM_URL = System.getProperty("appium.url", "http://127.0.0.1:4723");
-    public static final String PLATFORM_NAME = "Android";
-    public static final String DEVICE_NAME = System.getProperty("device.name", "Xiaomi14");
-    public static final String DEVICE_UDID = System.getProperty("device.udid", "");
+    public static final String APPIUM_URL = value("appium.url", "APPIUM_URL", "http://127.0.0.1:4723");
+    public static final String PLATFORM_NAME = value("platform.name", "HAPPFE_PLATFORM", "Android");
+    public static final String DEVICE_NAME = value("device.name", "HAPPFE_DEVICE", "Android Emulator");
+    public static final String DEVICE_UDID = value("device.udid", "HAPPFE_UDID", "");
 
     // ==================== HappFé App ====================
-    public static final String APP_PACKAGE = "br.com.emeraldindigo.happfe";
-    public static final String APP_ACTIVITY = "br.com.emeraldindigo.happfe.MainActivity";
+    public static final String APP_PACKAGE = value("app.package", "HAPPFE_APP_PACKAGE", "br.com.emeraldindigo.happfe");
+    public static final String APP_ACTIVITY = value("app.activity", "HAPPFE_APP_ACTIVITY", "br.com.emeraldindigo.happfe.MainActivity");
 
     // ==================== Test Configuration ====================
     // false = limpa os dados do app a cada sessão (necessário para validar cadastro/login do zero)
-    public static final boolean NO_RESET = false;
-    public static final boolean AUTO_GRANT_PERMISSIONS = true;
-    public static final long DEFAULT_TIMEOUT = 30;
+    public static final boolean NO_RESET = booleanValue("no.reset", "HAPPFE_NO_RESET", false);
+    public static final boolean AUTO_GRANT_PERMISSIONS = booleanValue("auto.grant.permissions", "HAPPFE_AUTO_GRANT_PERMISSIONS", true);
+    public static final long DEFAULT_TIMEOUT = positiveLong("wait.seconds", "HAPPFE_WAIT_SECONDS", 30);
     // Timeout curto para checagens negativas ("o elemento NÃO deve aparecer")
-    public static final long SHORT_TIMEOUT = 3;
+    public static final long SHORT_TIMEOUT = positiveLong("short.wait.seconds", "HAPPFE_SHORT_WAIT_SECONDS", 3);
 
     // ==================== Test Data ====================
     // Credenciais de uma conta REAL já existente (somente para os cenários de login isolados).
     // Informe via -Dlogin.email=... -Dlogin.senha=... ; sem elas esses cenários são ignorados.
-    public static final String TEST_USER_EMAIL = System.getProperty("login.email", "");
-    public static final String TEST_USER_PASSWORD = System.getProperty("login.senha", "");
+    public static final String TEST_USER_EMAIL = value("login.email", "HAPPFE_TEST_EMAIL", "");
+    public static final String TEST_USER_PASSWORD = value("login.senha", "HAPPFE_TEST_PASSWORD", "");
 
     // O app só mostra lojas/produtos com localização ou endereço. Usado se o GPS não resolver.
     public static final String ENDERECO_ENTREGA =
-            System.getProperty("compra.endereco", "Avenida Paulista, 1578, São Paulo");
+            value("compra.endereco", "HAPPFE_DELIVERY_ADDRESS", "Avenida Paulista, 1578, São Paulo");
 
     // Senha usada nos usuários gerados dinamicamente no cadastro
-    public static final String NEW_USER_PASSWORD = "Senha@123";
+    public static final String NEW_USER_PASSWORD = value("new.user.password", "HAPPFE_NEW_USER_TEST_PASSWORD", "QaMobile@12345");
 
     /** Domínio reservado para dados sintéticos em ambiente de teste. */
     public static final String TEST_EMAIL_DOMAIN = value(
@@ -40,7 +40,7 @@ public class TestConfig {
     public static final String TEST_USER_PHONE = value(
             "happfe.test.phone", "HAPPFE_TEST_PHONE", "");
     public static final String NEW_USER_TEST_PASSWORD = value(
-            "happfe.test.newUserPassword", "HAPPFE_NEW_USER_TEST_PASSWORD", "QaMobile@12345");
+            "happfe.test.newUserPassword", "HAPPFE_NEW_USER_TEST_PASSWORD", NEW_USER_PASSWORD);
 
     public static String requiredTestUserEmail() {
         return required(TEST_USER_EMAIL, "HAPPFE_TEST_EMAIL");

@@ -8,7 +8,7 @@ O escopo atual cobre **cadastro, autenticação e consulta de produtos** na pers
 
 A feature de cadastro cria um e-mail aleatório no domínio de teste configurado e um número de telemóvel com formato brasileiro. A conta é criada no backend ao executar o cenário positivo; por isso, este cenário está marcado `@staging @mutates-data` e deve ser executado apenas contra uma instalação de teste ligada a um backend de staging.
 
-A **compra com o utilizador recém-criado está sendo construída**.
+A compra com o utilizador recém-criado está coberta como fluxo E2E condicionado a staging, localização, loja aberta e política de pagamento do ambiente.
 
 ## Estrutura
 
@@ -100,5 +100,12 @@ O comando de execução real precisa de um dispositivo e servidor Appium dispon�
 
 O runner Cucumber gera HTML em `target/cucumber-report.html`; as propriedades do Cucumber também podem gerar `target/cucumber-reports`. Os resultados Allure ficam em `target/allure-results` quando o plugin correspondente está ativo.
 
+## Resultado da validação
 
-Automação ainda em construção...
+Para validar compilação, testes unitários e mapeamento dos steps sem dispositivo Android:
+
+```bash
+mvn -B clean test -Dcucumber.execution.dry-run=true
+```
+
+A última execução passou com **33 testes**: 29 cenários Cucumber e 4 testes unitários, sem falhas ou erros. O diagnóstico completo, as decisões de refatoração e as limitações conhecidas estão em [`docs/RELATORIO_QA.md`](docs/RELATORIO_QA.md).

@@ -12,8 +12,8 @@ public class Hooks {
 
     @Before(order = 0)
     public void iniciarSessao() {
-        AndroidDriver driver =DriverFactory.getDriver();
-        //ScenarioContext.reset();
+        ScenarioContext.reset();
+        AndroidDriver driver = DriverFactory.getDriver();
         if (driver == null) {
             throw new IllegalStateException("Não foi possível inicializar o AppiumDriver.");
         }
@@ -29,6 +29,7 @@ public class Hooks {
                             driver.getScreenshotAs(OutputType.BYTES),
                             "image/png",
                             "screenshot-falha-" + scenario.getName());
+                    scenario.attach(driver.getPageSource(), "text/xml", "page-source-falha");
                 } catch (Exception screenshotException) {
                     System.err.println("Não foi possível anexar screenshot: "
                             + screenshotException.getMessage());
@@ -40,4 +41,3 @@ public class Hooks {
     }
 
 }
-
